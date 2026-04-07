@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="auth-block" id="auth-block">
+        <div class="auth-block__wrapper">
+            <h2 class="auth-block__title">Authorization</h2>
+            <div class="auth-block__form">
+                <input id="login" type="text" placeholder="Login" class="auth-block__input">
+                <input id="password" type="password" placeholder="Password" class="auth-block__input">
+                <button class="auth-block__button" id="auth-button">Sign In</button>
+            </div>
+        </div>
+    </div>
+    <div class="monitor-list hide" id="monitor-list">
+        <div class="header">
+            <h2 class="auth-block__title">Server List</h2>
+            <div class="header__actions">
+                <button id="button-logout" class="btn-logout">Sign Out</button>
+                <button id="button-add">+</button>
+            </div>
+        </div>
+        <div id="servers" class="monitor-list__servers">
+            
+        </div>
+    </div>
+    <div class="monitor-add hide" id="monitor-add">
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal">
+                <h3 class="modal__title">Add Server</h3>
+                <input id="server-url" type="text" placeholder="Server URL" class="modal__input">
+                <div class="modal__buttons">
+                    <button class="modal__button modal__button--cancel" id="modal-cancel">Cancel</button>
+                    <button class="modal__button modal__button--confirm" id="modal-confirm">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+</html>

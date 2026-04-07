@@ -1,0 +1,9 @@
+.venv/
+.qwen/
+venv/
+.pytest_cache/
+media/
+*.db
+.~*
+.env
+__pycache__/

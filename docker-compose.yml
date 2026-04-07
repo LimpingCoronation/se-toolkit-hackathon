@@ -1,0 +1,141 @@
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:14.8-alpine3.18
+    environment:
+      POSTGRES_DB: "postgresdb"
+      POSTGRES_USER: "postgres_user"
+      POSTGRES_PASSWORD: "password123"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - postgresdb-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres_user -d postgresdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - application
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4:7.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "pgadmin@mail.ru"
+      PGADMIN_DEFAULT_PASSWORD: "password123"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    networks:
+      - application
+  
+  redis:
+    container_name: redis-server
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - application
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=postgresdb
+      - DB_USER=postgres_user
+      - DB_PASSWORD=password123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
+      - PYTHONPATH=/app/app
+    command: >
+      sh -c "poetry run alembic upgrade head &&
+           poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - application
+  worker:
+    build: .
+    network_mode: host
+    environment:
+      - DB_HOST=localhost
+      - REDIS_HOST=localhost
+      - PYTHONPATH=/app/app
+    command: >
+      sh -c "poetry run python3 /app/app/core/worker.py"
+  test_instance1:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      - DB_NAME=postgresdb
+      - DB_USER=postgres_user
+      - DB_PASSWORD=password123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
+      - PYTHONPATH=/app/app
+    command: >
+      sh -c "poetry run uvicorn app.test_instance:app --host 0.0.0.0 --port 9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - application
+  test_instance2:
+    build: .
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "9001:9001"
+    environment:
+      - DB_NAME=postgresdb
+      - DB_USER=postgres_user
+      - DB_PASSWORD=password123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_HOST=redis-server
+      - REDIS_PORT=6379
+      - PYTHONPATH=/app/app
+    command: >
+      sh -c "poetry run uvicorn app.test_instance:app --host 0.0.0.0 --port 9001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - application
+
+volumes:
+  postgresdb-data:
+  pgadmin-data:
+  redis-data:
+
+networks:
+  application:
+    driver: bridge
