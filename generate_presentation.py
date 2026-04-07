@@ -22,7 +22,7 @@ H = Inches(7.5)
 CX = W // 2  # center x
 
 GITHUB_URL = "https://github.com/LimpingCoronation/se-toolkit-hackathon"
-DEPLOY_URL = "https://your-deployed-url-here.com"
+DEPLOY_URL = "http://10.93.25.129:8000/static/index.html"
 
 
 def bg(slide):
