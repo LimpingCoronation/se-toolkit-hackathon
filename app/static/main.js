@@ -17,7 +17,7 @@ const servers = {};
 
 let token = localStorage.getItem("token") || "";
 
-const BASE_URL = "http://localhost:8000/";
+const BASE_URL = "http://10.93.25.129/:8000/";
 
 // Auto-restore session if token exists
 function initSession() {
@@ -28,7 +28,7 @@ function initSession() {
 
     loadServers();
 
-    socket = new WebSocket("ws://localhost:8000/monitor", [token]);
+    socket = new WebSocket("ws://10.93.25.129/:8000/monitor", [token]);
 
     setupSocketHandlers();
 }
